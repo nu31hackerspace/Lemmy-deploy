@@ -1,0 +1,31 @@
+name: Deploy Lemmy
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -eu
+
+            cd /opt/lemmy-deploy
+            git fetch --all
+            git reset --hard origin/main
+
+            export POSTGRES_PASSWORD='${{ secrets.POSTGRES_PASSWORD }}'
+            export PICTRS_API_KEY='${{ secrets.PICTRS_API_KEY }}'
+            export LEMMY_ADMIN_USERNAME='${{ secrets.LEMMY_ADMIN_USERNAME }}'
+            export LEMMY_ADMIN_PASSWORD='${{ secrets.LEMMY_ADMIN_PASSWORD }}'
+            export LEMMY_ADMIN_EMAIL='${{ secrets.LEMMY_ADMIN_EMAIL }}'
+
+            docker stack deploy -c docker-stack.yml lemmy

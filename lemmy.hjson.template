@@ -1,0 +1,22 @@
+{
+  database: {
+    url: "postgresql://lemmy:${POSTGRES_PASSWORD}@postgres:5432/lemmy"
+  }
+
+  pictrs: {
+    url: "http://pictrs:8080/"
+    api_key: "${PICTRS_API_KEY}"
+  }
+
+  setup: {
+    admin_username: "${LEMMY_ADMIN_USERNAME}"
+    admin_password: "${LEMMY_ADMIN_PASSWORD}"
+    site_name: "Nachitima's Lemmy"
+    admin_email: "${LEMMY_ADMIN_EMAIL}"
+  }
+
+  hostname: "forum.nu31.space"
+  bind: "0.0.0.0"
+  port: 8536
+  tls_enabled: true
+}
