@@ -11,11 +11,11 @@
   setup: {
     admin_username: "${LEMMY_ADMIN_USERNAME}"
     admin_password: "${LEMMY_ADMIN_PASSWORD}"
-    site_name: "Nachitima's Lemmy"
     admin_email: "${LEMMY_ADMIN_EMAIL}"
+    site_name: "NU31 Hackerspace"
   }
 
-  hostname: "forum.nu31.space"
+  hostname: "${LEMMY_HOSTNAME}"
   bind: "0.0.0.0"
   port: 8536
   tls_enabled: true

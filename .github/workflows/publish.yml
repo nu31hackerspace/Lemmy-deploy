@@ -1,0 +1,45 @@
+name: Deploy Lemmy (Swarm)
+
+on:
+  push:
+    branches:
+      - "main"
+
+env:
+  DOCKER_STACK_NAME: lemmy
+  REGISTRY: ghcr.io
+
+  # Deployment target
+  DEPLOY_USER: deploy
+  HOST: ${{ vars.HOST }}
+
+  # Stack variables
+  LEMMY_HOSTNAME: ${{ vars.LEMMY_HOSTNAME }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create .env file for Docker Stack
+        run: |
+          set -eu
+          echo "LEMMY_HOSTNAME='${LEMMY_HOSTNAME}'" >> .env
+
+      - name: Docker Stack Deploy
+        uses: cssnr/stack-deploy-action@v1
+        with:
+          name: ${{ env.DOCKER_STACK_NAME }}
+          file: docker-stack.yml
+          host: ${{ env.HOST }}
+          port: 22
+          user: ${{ env.DEPLOY_USER }}
+          ssh_key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          env_file: .env
+          detach: false
+          prune: true
+          resolve_image: "always"
+          summary: true
