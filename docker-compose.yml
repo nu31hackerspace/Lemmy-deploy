@@ -26,12 +26,6 @@ services:
     command: ["/usr/local/bin/pict-rs", "run"]
     volumes:
       - pictrs_data:/mnt
-    healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/ >/dev/null 2>&1 || exit 1"]
-      interval: 20s
-      timeout: 5s
-      retries: 10
-      start_period: 20s
 
   lemmy:
     image: dessalines/lemmy:0.19.18
@@ -45,7 +39,7 @@ services:
       postgres:
         condition: service_healthy
       pictrs:
-        condition: service_healthy
+        condition: service_started
     volumes:
       - ./lemmy.generated.hjson:/config/lemmy.hjson:ro
     healthcheck:
@@ -67,7 +61,7 @@ services:
       LEMMY_UI_DEBUG: "false"
     depends_on:
       lemmy:
-        condition: service_healthy
+        condition: service_started
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:1234/ >/dev/null 2>&1 || exit 1"]
       interval: 20s
