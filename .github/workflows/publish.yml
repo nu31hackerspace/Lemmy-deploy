@@ -13,10 +13,10 @@ env:
 
   # Deployment target
   DEPLOY_USER: deploy
-  HOST: ${{ vars.HOST }}
+  HOST: ${{ secrets.HOST }}
 
   # Stack variables
-  LEMMY_HOSTNAME: ${{ vars.LEMMY_HOSTNAME }}
+  LEMMY_HOSTNAME: ${{ secrets.LEMMY_HOSTNAME }}
   POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
   PICTRS_API_KEY: ${{ secrets.PICTRS_API_KEY }}
   LEMMY_ADMIN_USERNAME: ${{ secrets.LEMMY_ADMIN_USERNAME }}
