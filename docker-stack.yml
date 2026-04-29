@@ -63,6 +63,11 @@ services:
   lemmy:
     image: dessalines/lemmy:0.19.18
     hostname: lemmy
+    ports:
+      - target: 8536
+        published: 8536
+        protocol: tcp
+        mode: host
     environment:
       LEMMY_CONFIG_LOCATION: /config/lemmy.hjson
     configs:
@@ -88,7 +93,6 @@ services:
       - pictrs
     networks:
       - internal
-      - infra_reverse-proxy
     deploy:
       restart_policy:
         condition: on-failure
@@ -106,6 +110,11 @@ services:
 
   lemmy-ui:
     image: dessalines/lemmy-ui:0.19.18
+    ports:
+      - target: 1234
+        published: 1234
+        protocol: tcp
+        mode: host
     environment:
       LEMMY_UI_LEMMY_INTERNAL_HOST: lemmy:8536
       LEMMY_UI_LEMMY_EXTERNAL_HOST: ${LEMMY_HOSTNAME}
@@ -115,7 +124,6 @@ services:
       - lemmy
     networks:
       - internal
-      - infra_reverse-proxy
     deploy:
       restart_policy:
         condition: on-failure
@@ -134,8 +142,6 @@ services:
 networks:
   internal:
     driver: overlay
-  infra_reverse-proxy:
-    external: true
 
 volumes:
   postgres_data:
