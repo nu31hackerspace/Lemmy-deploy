@@ -43,7 +43,7 @@ services:
       - /bin/sh
       - -lc
       - |
-        export PICTRS__SERVER__API_KEY="$(cat /run/secrets/PICTRS_API_KEY)"
+        export PICTRS__SERVER__API_KEY="$$(cat /run/secrets/PICTRS_API_KEY)"
         exec /usr/local/bin/pict-rs -p /mnt
     deploy:
       restart_policy:
