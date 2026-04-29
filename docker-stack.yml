@@ -44,7 +44,7 @@ services:
       - -lc
       - |
         export PICTRS__SERVER__API_KEY="$$(cat /run/secrets/PICTRS_API_KEY)"
-        exec /usr/local/bin/pict-rs -p /mnt
+        exec /usr/local/bin/pict-rs run
     deploy:
       restart_policy:
         condition: on-failure
@@ -69,10 +69,10 @@ services:
         protocol: tcp
         mode: host
     environment:
-      LEMMY_CONFIG_LOCATION: /config/lemmy.hjson
+      LEMMY_CONFIG_LOCATION: /tmp/lemmy.hjson
     configs:
       - source: lemmy_hjson_template
-        target: /config/lemmy.hjson.template
+        target: /lemmy.hjson.template
       - source: render_lemmy_config_sh
         target: /usr/local/bin/render-lemmy-config.sh
         mode: 0555

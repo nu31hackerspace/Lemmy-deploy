@@ -8,5 +8,7 @@ export LEMMY_ADMIN_PASSWORD="$(cat /run/secrets/LEMMY_ADMIN_PASSWORD)"
 export LEMMY_ADMIN_EMAIL="$(cat /run/secrets/LEMMY_ADMIN_EMAIL)"
 
 : "${LEMMY_HOSTNAME:?LEMMY_HOSTNAME is required}"
+: "${LEMMY_CONFIG_LOCATION:=/tmp/lemmy.hjson}"
 
-envsubst < /config/lemmy.hjson.template > /config/lemmy.hjson
+mkdir -p "$(dirname "${LEMMY_CONFIG_LOCATION}")"
+envsubst < /lemmy.hjson.template > "${LEMMY_CONFIG_LOCATION}"
