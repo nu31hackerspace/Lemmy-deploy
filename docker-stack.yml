@@ -61,7 +61,7 @@ services:
       start_period: 20s
 
   lemmy:
-    image: dessalines/lemmy:0.19.14
+    image: dessalines/lemmy:0.19.18
     hostname: lemmy
     environment:
       LEMMY_CONFIG_LOCATION: /config/lemmy.hjson
@@ -105,7 +105,7 @@ services:
       start_period: 30s
 
   lemmy-ui:
-    image: dessalines/lemmy-ui:0.19.14
+    image: dessalines/lemmy-ui:0.19.18
     environment:
       LEMMY_UI_LEMMY_INTERNAL_HOST: lemmy:8536
       LEMMY_UI_LEMMY_EXTERNAL_HOST: ${LEMMY_HOSTNAME}
