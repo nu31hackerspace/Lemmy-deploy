@@ -10,9 +10,10 @@ env:
   DOCKER_STACK_NAME: lemmy
   REGISTRY: ghcr.io
   REVERSE_PROXY_NETWORK: infra_reverse-proxy
+  SSH_PORT: 2222
 
   # Deployment target
-  DEPLOY_USER: deploy
+  DEPLOY_USER: root
   HOST: ${{ secrets.HOST }}
 
   # Stack variables
@@ -43,16 +44,20 @@ jobs:
           chmod 700 ~/.ssh
           printf '%s\n' "${{ secrets.FORUM_SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H "${HOST}" >> ~/.ssh/known_hosts 2>/dev/null
+          ssh-keyscan -p "${SSH_PORT}" -H "${HOST}" >> ~/.ssh/known_hosts 2>/dev/null
 
       - name: Bootstrap Swarm resources
         run: |
           set -eu
 
-          ssh "${DEPLOY_USER}@${HOST}" "docker info --format '{{ .Swarm.LocalNodeState }}'" | grep -qx active || \
-            ssh "${DEPLOY_USER}@${HOST}" "docker swarm init"
+          ssh_remote() {
+            ssh -p "${SSH_PORT}" "${DEPLOY_USER}@${HOST}" "$@"
+          }
 
-          ssh "${DEPLOY_USER}@${HOST}" "docker network inspect ${REVERSE_PROXY_NETWORK} >/dev/null 2>&1 || docker network create --driver overlay --attachable ${REVERSE_PROXY_NETWORK}"
+          ssh_remote "docker info --format '{{ .Swarm.LocalNodeState }}'" | grep -qx active || \
+            ssh_remote "docker swarm init"
+
+          ssh_remote "docker network inspect ${REVERSE_PROXY_NETWORK} >/dev/null 2>&1 || docker network create --driver overlay --attachable ${REVERSE_PROXY_NETWORK}"
 
           ensure_secret() {
             name="$1"
@@ -63,12 +68,12 @@ jobs:
               exit 1
             fi
 
-            if ssh "${DEPLOY_USER}@${HOST}" "docker secret inspect ${name} >/dev/null 2>&1"; then
+            if ssh_remote "docker secret inspect ${name} >/dev/null 2>&1"; then
               echo "Secret ${name} already exists"
               return
             fi
 
-            printf '%s' "$value" | ssh "${DEPLOY_USER}@${HOST}" "docker secret create ${name} -"
+            printf '%s' "$value" | ssh -p "${SSH_PORT}" "${DEPLOY_USER}@${HOST}" "docker secret create ${name} -"
           }
 
           ensure_secret POSTGRES_PASSWORD "${POSTGRES_PASSWORD}"
@@ -83,7 +88,7 @@ jobs:
           name: ${{ env.DOCKER_STACK_NAME }}
           file: docker-stack.yml
           host: ${{ env.HOST }}
-          port: 22
+          port: ${{ env.SSH_PORT }}
           user: ${{ env.DEPLOY_USER }}
           ssh_key: ${{ secrets.FORUM_SSH_PRIVATE_KEY }}
           env_file: .env
