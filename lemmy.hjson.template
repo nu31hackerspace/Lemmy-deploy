@@ -1,6 +1,6 @@
 {
   database: {
-    url: "postgresql://lemmy:${POSTGRES_PASSWORD}@postgres:5432/lemmy"
+    uri: "postgresql://lemmy:${POSTGRES_PASSWORD}@postgres:5432/lemmy"
   }
 
   pictrs: {
