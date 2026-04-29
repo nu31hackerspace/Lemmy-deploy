@@ -37,7 +37,6 @@ services:
       - pictrs_data:/mnt
     networks:
       - internal
-      - infra_reverse-proxy
     secrets:
       - PICTRS_API_KEY
     command:

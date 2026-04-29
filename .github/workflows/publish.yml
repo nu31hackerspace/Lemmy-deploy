@@ -4,10 +4,12 @@ on:
   push:
     branches:
       - "main"
+  workflow_dispatch:
 
 env:
   DOCKER_STACK_NAME: lemmy
   REGISTRY: ghcr.io
+  REVERSE_PROXY_NETWORK: infra_reverse-proxy
 
   # Deployment target
   DEPLOY_USER: deploy
@@ -15,6 +17,11 @@ env:
 
   # Stack variables
   LEMMY_HOSTNAME: ${{ vars.LEMMY_HOSTNAME }}
+  POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+  PICTRS_API_KEY: ${{ secrets.PICTRS_API_KEY }}
+  LEMMY_ADMIN_USERNAME: ${{ secrets.LEMMY_ADMIN_USERNAME }}
+  LEMMY_ADMIN_PASSWORD: ${{ secrets.LEMMY_ADMIN_PASSWORD }}
+  LEMMY_ADMIN_EMAIL: ${{ secrets.LEMMY_ADMIN_EMAIL }}
 
 jobs:
   deploy:
@@ -28,6 +35,47 @@ jobs:
         run: |
           set -eu
           echo "LEMMY_HOSTNAME='${LEMMY_HOSTNAME}'" >> .env
+
+      - name: Configure SSH key
+        run: |
+          set -eu
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${HOST}" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Bootstrap Swarm resources
+        run: |
+          set -eu
+
+          ssh "${DEPLOY_USER}@${HOST}" "docker info --format '{{ .Swarm.LocalNodeState }}'" | grep -qx active || \
+            ssh "${DEPLOY_USER}@${HOST}" "docker swarm init"
+
+          ssh "${DEPLOY_USER}@${HOST}" "docker network inspect ${REVERSE_PROXY_NETWORK} >/dev/null 2>&1 || docker network create --driver overlay --attachable ${REVERSE_PROXY_NETWORK}"
+
+          ensure_secret() {
+            name="$1"
+            value="$2"
+
+            if [ -z "$value" ]; then
+              echo "Secret $name is empty" >&2
+              exit 1
+            fi
+
+            if ssh "${DEPLOY_USER}@${HOST}" "docker secret inspect ${name} >/dev/null 2>&1"; then
+              echo "Secret ${name} already exists"
+              return
+            fi
+
+            printf '%s' "$value" | ssh "${DEPLOY_USER}@${HOST}" "docker secret create ${name} -"
+          }
+
+          ensure_secret POSTGRES_PASSWORD "${POSTGRES_PASSWORD}"
+          ensure_secret PICTRS_API_KEY "${PICTRS_API_KEY}"
+          ensure_secret LEMMY_ADMIN_USERNAME "${LEMMY_ADMIN_USERNAME}"
+          ensure_secret LEMMY_ADMIN_PASSWORD "${LEMMY_ADMIN_PASSWORD}"
+          ensure_secret LEMMY_ADMIN_EMAIL "${LEMMY_ADMIN_EMAIL}"
 
       - name: Docker Stack Deploy
         uses: cssnr/stack-deploy-action@v1
