@@ -41,7 +41,7 @@ jobs:
           set -eu
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-          printf '%s\n' "${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          printf '%s\n' "${{ secrets.FORUM_SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H "${HOST}" >> ~/.ssh/known_hosts 2>/dev/null
 
@@ -85,7 +85,7 @@ jobs:
           host: ${{ env.HOST }}
           port: 22
           user: ${{ env.DEPLOY_USER }}
-          ssh_key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          ssh_key: ${{ secrets.FORUM_SSH_PRIVATE_KEY }}
           env_file: .env
           detach: false
           prune: true
