@@ -29,6 +29,7 @@ Current versions:
 - [lemmy.hjson.template](./lemmy.hjson.template): template for the Lemmy backend config
 - [render-lemmy-config.sh](./render-lemmy-config.sh): renders `lemmy.generated.hjson` from environment variables
 - [BACKUP.md](./BACKUP.md): backup and restore instructions
+- [ops/backup](./ops/backup): tested backup automation files for the VM
 
 ## Deployment Model
 

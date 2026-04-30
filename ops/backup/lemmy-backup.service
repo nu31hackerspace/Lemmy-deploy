@@ -1,0 +1,11 @@
+[Unit]
+Description=Lemmy backup
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=-/etc/default/lemmy-backup
+ExecStart=/usr/local/bin/lemmy-backup.sh
+User=root
+Group=root

@@ -13,6 +13,13 @@ This note follows the official Lemmy backup guidance, adapted to this repo's cur
 - https://join-lemmy.org/docs/administration/backup_and_restore.html
 - https://join-lemmy.org/docs/administration/install_docker.html
 
+The tested VM automation files for this backup flow are stored in:
+
+- [ops/backup/lemmy-backup.sh](/home/denchik/projects/Lemmy-deploy/ops/backup/lemmy-backup.sh)
+- [ops/backup/lemmy-backup.env](/home/denchik/projects/Lemmy-deploy/ops/backup/lemmy-backup.env)
+- [ops/backup/lemmy-backup.service](/home/denchik/projects/Lemmy-deploy/ops/backup/lemmy-backup.service)
+- [ops/backup/lemmy-backup.timer](/home/denchik/projects/Lemmy-deploy/ops/backup/lemmy-backup.timer)
+
 ## What To Back Up
 
 At minimum, back up:
@@ -132,3 +139,14 @@ ssh nu31forum 'cd /opt/lemmy && docker compose up -d'
 - Do not rely only on raw PostgreSQL volume copies while the database is running.
 - If you rotate GitHub secrets, make sure `/opt/lemmy/.env` and the running deployment stay in sync.
 - Store backups outside the VM.
+
+## Tested VM Automation
+
+The current tested automation on `nu31forum` uses:
+
+- `/usr/local/bin/lemmy-backup.sh`
+- `/etc/default/lemmy-backup`
+- `/etc/systemd/system/lemmy-backup.service`
+- `/etc/systemd/system/lemmy-backup.timer`
+
+The checked-in equivalents are under [ops/backup](/home/denchik/projects/Lemmy-deploy/ops/backup).
