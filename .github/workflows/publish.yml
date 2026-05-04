@@ -17,6 +17,11 @@ env:
   LEMMY_ADMIN_USERNAME: ${{ secrets.LEMMY_ADMIN_USERNAME }}
   LEMMY_ADMIN_PASSWORD: ${{ secrets.LEMMY_ADMIN_PASSWORD }}
   LEMMY_ADMIN_EMAIL: ${{ secrets.LEMMY_ADMIN_EMAIL }}
+  LEMMY_SMTP_SERVER: ${{ vars.LEMMY_SMTP_SERVER }}
+  LEMMY_SMTP_LOGIN: ${{ vars.LEMMY_SMTP_LOGIN }}
+  LEMMY_SMTP_PASSWORD: ${{ secrets.LEMMY_SMTP_PASSWORD }}
+  LEMMY_SMTP_FROM: ${{ vars.LEMMY_SMTP_FROM }}
+  LEMMY_SMTP_TLS: ${{ vars.LEMMY_SMTP_TLS }}
 
 jobs:
   deploy:
@@ -34,6 +39,14 @@ jobs:
           write_var POSTGRES_PASSWORD
           write_var PICTRS_API_KEY
           write_var LEMMY_HOSTNAME
+          write_var LEMMY_ADMIN_USERNAME
+          write_var LEMMY_ADMIN_PASSWORD
+          write_var LEMMY_ADMIN_EMAIL
+          write_var LEMMY_SMTP_SERVER
+          write_var LEMMY_SMTP_LOGIN
+          write_var LEMMY_SMTP_PASSWORD
+          write_var LEMMY_SMTP_FROM
+          write_var LEMMY_SMTP_TLS
 
       - name: Render Lemmy config
         run: |

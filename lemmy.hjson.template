@@ -19,4 +19,12 @@
   bind: "0.0.0.0"
   port: 8536
   tls_enabled: true
+
+  email: {
+    smtp_server: "${LEMMY_SMTP_SERVER}"
+    smtp_login: "${LEMMY_SMTP_LOGIN}"
+    smtp_password: "${LEMMY_SMTP_PASSWORD}"
+    smtp_from_address: "${LEMMY_SMTP_FROM}"
+    tls_type: "${LEMMY_SMTP_TLS}"
+  }
 }

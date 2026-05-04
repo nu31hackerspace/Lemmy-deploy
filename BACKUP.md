@@ -132,10 +132,69 @@ ssh nu31forum 'docker run --rm -v lemmy_pictrs_data:/target -v /root:/backup alp
 ssh nu31forum 'cd /opt/lemmy && docker compose up -d'
 ```
 
+## Validated Local Restore Drill
+
+This backup flow was validated on a separate local machine with `docker compose`.
+
+Validated local restore order:
+
+1. Copy `docker-compose.yml`, `.env`, `lemmy.generated.hjson`, `lemmy_db.sql.gz`, and `lemmy_pictrs.tar.gz` into a separate local test directory.
+2. For local-only testing, change `LEMMY_HOSTNAME` to `localhost`.
+3. For local-only testing, set `hostname: "localhost"` and `tls_enabled: false` in `lemmy.generated.hjson`.
+4. Start only `postgres`.
+5. Restore the SQL dump.
+6. Restore the `pictrs` volume.
+7. Start the full stack.
+
+Example local restore sequence:
+
+```bash
+docker compose up -d postgres
+gunzip -c lemmy_db.sql.gz | docker compose exec -T postgres psql -U lemmy
+docker run --rm -v lemmy_pictrs_data:/target -v "$PWD:/backup" alpine:3.20 sh -c 'rm -rf /target/* && tar xzf /backup/lemmy_pictrs.tar.gz -C /target'
+docker compose up -d
+```
+
+## Restore Validation Checks
+
+A restore should be considered successful only after checking both the stack state and the restored data.
+
+Recommended checks:
+
+```bash
+docker compose ps
+curl -I http://127.0.0.1:1234
+curl -sS http://127.0.0.1:8536/api/v3/site
+curl -sS 'http://127.0.0.1:8536/api/v3/post/list?type_=Local&sort=New&limit=10'
+curl -sS 'http://127.0.0.1:8536/api/v3/comment/list?type_=All&limit=10'
+```
+
+Expected outcome:
+
+- `lemmy`, `lemmy-ui`, and `postgres` are healthy
+- the UI returns `200`
+- the API returns `200`
+- restored posts and comments are present
+- `pictrs` media files are present
+
+## Localhost Limitation
+
+API-level restore validation is sufficient to confirm that the backup mechanism works.
+
+However, a localhost restore can still have browser-side issues because the restored data keeps the original site origin, for example `https://forum.nu31.space`.
+
+In practice this means:
+
+- direct API login can work
+- the browser UI on `http://localhost:1234` can still fail for some actions, including login, because of origin / hostname mismatch
+
+For a fully realistic browser test, restore under the original hostname or use local host mapping plus a local reverse proxy.
+
 ## Notes
 
 - The database backup is the most important part.
 - `pictrs` media can grow quickly, so monitor volume size and retention.
+- A successful API-level restore is enough to validate the backup mechanism even if a localhost browser session is not fully identical to production.
 - Do not rely only on raw PostgreSQL volume copies while the database is running.
 - If you rotate GitHub secrets, make sure `/opt/lemmy/.env` and the running deployment stay in sync.
 - Store backups outside the VM.
