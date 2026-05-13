@@ -17,6 +17,7 @@ The stack includes:
 - `pictrs`
 - `lemmy`
 - `lemmy-ui`
+- `alexandrite`
 
 Current versions:
 
@@ -25,7 +26,7 @@ Current versions:
 
 ## Repository Files
 
-- [docker-compose.yml](./docker-compose.yml): runtime stack for the forum VM
+- [docker-compose.yml](./docker-compose.yml): runtime stack for the Lemmy VM
 - [lemmy.hjson.template](./lemmy.hjson.template): template for the Lemmy backend config
 - [render-lemmy-config.sh](./render-lemmy-config.sh): renders `lemmy.generated.hjson` from environment variables
 - [BACKUP.md](./BACKUP.md): backup and restore instructions
@@ -61,8 +62,8 @@ The deploy workflow expects these repository secrets:
 
 Expected values for the current production setup:
 
-- `HOST`: the public SSH host of the forum VM
-- `LEMMY_HOSTNAME`: the public forum domain, for example `forum.nu31.space`
+- `HOST`: the public SSH host of the Lemmy VM
+- `LEMMY_HOSTNAME`: the public Lemmy domain, for example `lemmy.nu31.space`
 - `FORUM_SSH_PRIVATE_KEY`: private SSH key used by GitHub Actions to access the VM
 
 ## Remote Host Assumptions
@@ -85,7 +86,7 @@ export PICTRS_API_KEY=...
 export LEMMY_ADMIN_USERNAME=...
 export LEMMY_ADMIN_PASSWORD=...
 export LEMMY_ADMIN_EMAIL=...
-export LEMMY_HOSTNAME=forum.example.com
+export LEMMY_HOSTNAME=lemmy.example.com
 sh ./render-lemmy-config.sh
 ```
 
@@ -109,6 +110,7 @@ The VM exposes:
 
 - `8536` for Lemmy backend
 - `1234` for Lemmy UI
+- `3000` for Alexandrite
 
 Your external proxy must route:
 
@@ -121,6 +123,10 @@ Your external proxy must route:
 - `POST` requests
 
 to the backend service, and route normal web traffic to `lemmy-ui`.
+
+If you expose Alexandrite on a separate domain such as `a.lemmy.nu31.space`,
+route that host to port `3000`. Keep `LEMMY_HOSTNAME` set to the main Lemmy
+instance domain, for example `lemmy.nu31.space`.
 
 ## Backups
 
